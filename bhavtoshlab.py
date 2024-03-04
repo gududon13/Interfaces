@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pyvisa as pv
-
+KILO = 1000
 RESOURCE_LISTS = pv.ResourceManager().list_resources()
 
 class SR830LockIn_interface:
@@ -19,8 +19,9 @@ class SR830LockIn_interface:
         else:
             print("High voltage i.e greater than '1v' is damaging for system so restricted")
         pass
-    def getInputVoltage(self,unit = 'v'):
+    def getInputVoltage(self,unit = 'v'): 
         return self.orm.query('SLVL?')
+    
     def setInputCurrent(self,current, unit = 'v'):
         pass
     def getInputCurrent(self):
@@ -36,10 +37,50 @@ class SR830LockIn_interface:
         pass
     def getVoltageR(self,unit = 'v'):
          return self.orm.query('OUTP?3')
+    def getVoltageX(self,unit = 'v'):
+         return self.orm.query('OUTP?1')
     def autoSensetivity(self):
-        pass
+        vr = float(self.getVoltageR())
+        if (vr)>= 0.2 and (vr)< 0.5 :
+            self.orm.write('SENS25')
+        elif(vr)>= 0.1 and (vr) < 0.2:
+             self.orm.write('SENS24')
+        elif(vr)>= 0.02 and (vr) < 0.05:
+             self.orm.write('SENS23')
+        elif(vr)>= 0.01 and (vr) < 0.02:
+             self.orm.write('SENS22')
+        elif(vr)>= 0.005 and (vr) < 0.01:
+             self.orm.write('SENS21')
+        elif(vr)>= 0.002 and (vr) < 0.005:
+             self.orm.write('SENS19')
+        elif(vr)>= 0.001 and (vr) < 0.002:
+            self.orm.write('SENS19')
+        elif(vr)>= 0.0002 and (vr) < 0.001:
+             self.orm.write('SENS17')
+        elif(vr)>= 0 and (vr) < 0.0001:
+             self.orm.write('SENS15')
+        else:
+             self.orm.write('SENS26')
+            
+
+        
     def autoTimeConstant(self):
-        pass
+        fq = float(self.getFrequency())
+        if (fq)>= 500 and (fq)< 1000 :
+            self.orm.write('OFLT7')
+        elif(fq)>= 1000 and (fq) < 2000:
+             self.orm.write('OFLT6')
+        elif(fq)>= 2000 and (fq) < 5000:
+             self.orm.write('OFLT5')
+        elif(fq)>= 5000 and (fq) < 10000:
+             self.orm.write('OFLT4')
+        elif(fq)>= 10000 and (fq) < 50000:
+             self.orm.write('OFLT3')
+        elif(fq)>= 50000 and (fq) < 103000:
+             self.orm.write('OFLT1')
+        else:
+             self.orm.write('OFLT8')
+        
     def autophase(self):
         pass
     def setPhase(self,phase):
@@ -48,5 +89,7 @@ class SR830LockIn_interface:
         self.orm.write(command)
     def getPhase(self):
         return self.orm.query('OUTP?4')
+    def getVoltageY(self,unit = 'v'):
+        return self.orm.query('OUTP?2')
 
     
