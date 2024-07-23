@@ -12,6 +12,7 @@ class SR830LockIn_interface:
     
     def __init__(self,adress=0):
         self.ad=RESOURCE_LISTS[adress]
+        self.prvsens= 24
         self.orm= pv.ResourceManager().open_resource(self.ad,write_termination = '\r',read_termination='\r')
         
     def setInputVoltage(self,voltage):
@@ -43,29 +44,72 @@ class SR830LockIn_interface:
     def getVoltageR(self,unit = 'v'):
          return self.orm.query('OUTP?3\r')
     def getVoltageX(self,unit = 'v'):
-         return self.orm.query('OUTP?1')
-    def autoSensetivity(self):
-        vr = float(self.getVoltageR())
+         return self.orm.query('OUTP?1\r')
+    def autoSensetivity(self,vr):
+        sensnow= 0
+       # vr = float(self.getVoltageR())
         if (vr)>= 0.2 and (vr)< 0.5 :
-            self.orm.write('SENS25\r')
+           
+            sensnow=26
+            if(self.prvsens!=sensnow):
+                  self.orm.write('SENS26')
+                  self.prvsens=26
+
+           
         elif(vr)>= 0.1 and (vr) < 0.2:
-             self.orm.write('SENS24\r')
+             
+             sensnow=25
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS25')
+                  self.prvsens=25
         elif(vr)>= 0.02 and (vr) < 0.05:
-             self.orm.write('SENS23\r')
+             
+             sensnow=24
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS24')
+                  self.prvsens=24
         elif(vr)>= 0.01 and (vr) < 0.02:
-             self.orm.write('SENS22\r')
+             
+             sensnow=23
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS23')
+                  self.prvsens=23
         elif(vr)>= 0.005 and (vr) < 0.01:
-             self.orm.write('SENS21\r')
+            
+             sensnow=22
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS22')
+                  self.prvsens=22
         elif(vr)>= 0.002 and (vr) < 0.005:
-             self.orm.write('SENS19\r')
+           
+             sensnow=21
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS21')
+                  self.prvsens=21
         elif(vr)>= 0.001 and (vr) < 0.002:
-            self.orm.write('SENS19\r')
+          
+            sensnow=20
+            if(self.prvsens!=sensnow):
+                  self.orm.write('SENS20')
+                  self.prvsens=20
         elif(vr)>= 0.0002 and (vr) < 0.001:
-             self.orm.write('SENS17\r')
+            
+             sensnow=19
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS19')
+                  self.prvsens=19
         elif(vr)>= 0 and (vr) < 0.0001:
-             self.orm.write('SENS15\r')
+             
+             sensnow=18
+             if(self.prvsens!=sensnow):
+                  self.orm.write('SENS18')
+                  self.prvsens=18
         else:
-             self.orm.write('SENS26\r')
+             
+              sensnow=26
+              if(self.prvsens!=sensnow):
+                  self.orm.write('SENS26')
+                  self.prvsens=26
             
 
         
@@ -93,9 +137,9 @@ class SR830LockIn_interface:
         print(command)
         self.orm.write(command)
     def getPhase(self):
-        return self.orm.query('OUTP?4')
+        return self.orm.query('OUTP?4\r')
     def getVoltageY(self,unit = 'v'):
-        return self.orm.query('OUTP?2')
+        return self.orm.query('OUTP?2\r')
 
 class Temp_Controller336:
        
@@ -244,6 +288,9 @@ class ITC503_temperature_Controller:
           pass
      def getCalibrationTemp(self):
           pass
+     def flush(self):
+          for i in range(0,20):
+               self.get_Temperature(1)
 def runProcess(orm,Vector_array,ramprate):
      f= 310
      for x in  range(20):
